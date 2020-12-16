@@ -5,7 +5,7 @@ metadata:
   labels:
     app: api-hello
 spec:
-  replicas: 5
+  replicas: 2
   selector:
     matchLabels:
       app: api-hello
@@ -16,6 +16,14 @@ spec:
     spec:
       containers:
       - name: api-hello
-        image: mariousersbackend:0.0.7
+        image: nicolasbis/marionodebackend:1.0.2
         ports:
         - containerPort: 8080
+        resources:
+            requests:
+              cpu: "200m"
+              memory: "200Mi"
+            limits:
+                  cpu: "200m"
+                  memory: "200Mi"
+              
