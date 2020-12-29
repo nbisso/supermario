@@ -3,7 +3,7 @@ apiVersion: v1
 metadata:
   name: api-hello-service
 spec:
-  type: LoadBalancer
+  # type: LoadBalancer
   selector:
     app: api-hello
   ports:
