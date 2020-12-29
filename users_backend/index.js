@@ -31,7 +31,8 @@ app.get("/users", (req, res) => {
 
 app.get("*", (req, res) => {
     var hostname = os.hostname();
-    res.send("Soy el host:" + hostname)
+    res.header("X-User", req.header("x-user"))
+    res.send("Soy el host:" + hostname + "y el user: " + req.header("x-user"))
 })
 
 app.listen(8080, () => {
