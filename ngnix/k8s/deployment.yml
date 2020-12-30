@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: ngnix
-        image: marionginx:0.0.22
+        image: marionginx:0.0.34
         ports:
         - containerPort: 80
         resources:
