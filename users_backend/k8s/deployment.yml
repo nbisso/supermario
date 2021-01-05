@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: api-hello
-        image: marionodebackend:1.0.4
+        image: marionodebackend:1.0.10
         ports:
         - containerPort: 8080
         resources:

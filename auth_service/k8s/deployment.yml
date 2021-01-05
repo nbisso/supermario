@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: auth-service
-        image: auth-service:0.0.8
+        image: auth-service:0.0.13
         ports:
         - containerPort: 8080
         resources:

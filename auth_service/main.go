@@ -2,12 +2,17 @@ package main
 
 import (
 	"auth-service/model"
+	"context"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var mySecret []byte = []byte("AllYourBase")
@@ -22,10 +27,87 @@ var users []model.User = []model.User{
 	},
 }
 
+type NewPing struct {
+	Ping string `json:”ping,omitempty”`
+}
+
 func main() {
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://mongo-0.mongo:27017,mongo-1.mongo:27017,mongo-2.mongo:27017/auth"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+
+	err = client.Connect(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer client.Disconnect(ctx)
+
 	r := gin.Default()
 
-	r.GET("/ping", func(c *gin.Context) {
+	r.GET("/auth/pings", func(c *gin.Context) {
+		items := []NewPing{}
+
+		collection := client.Database("auth").Collection("pings")
+
+		cur, err := collection.Find(c, NewPing{})
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, err.Error())
+			return
+		}
+		defer cur.Close(context.Background())
+
+		for cur.Next(context.Background()) {
+			// To decode into a struct, use cursor.Decode()
+			result := NewPing{}
+
+			err := cur.Decode(&result)
+			if err != nil {
+				log.Fatal(err)
+			}
+			// do something with result...
+
+			// To get the raw bson bytes use cursor.Current
+			// raw := cur.Current
+
+			// do something with raw...
+
+			items = append(items, result)
+		}
+		if err := cur.Err(); err != nil {
+			c.JSON(http.StatusBadRequest, err.Error())
+			return
+		}
+
+		c.JSON(http.StatusOK, items)
+
+	})
+
+	r.GET("/auth/ping", func(c *gin.Context) {
+
+		name, err := os.Hostname()
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, "Error on binding body")
+			return
+		}
+
+		newitem := NewPing{name}
+
+		collection := client.Database("auth").Collection("pings")
+
+		insertResult, err := collection.InsertOne(context.TODO(), newitem)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println("Inserted post with ID:", insertResult.InsertedID)
+
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
