@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: users-backend-service
+spec:
+  # type: LoadBalancer
+  selector:
+    app: users-backend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

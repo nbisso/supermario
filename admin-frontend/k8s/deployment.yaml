@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-frontend-deployment
+  labels:
+    app: admin-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: admin-frontend
+  template:
+    metadata:
+      labels:
+        app: admin-frontend
+    spec:
+      containers:
+        - name: admin-frontend
+          image: admin-frontend:0.0.1
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              cpu: '500m'
+              memory: '500Mi'
+            limits:
+              cpu: '500m'
+              memory: '500Mi'

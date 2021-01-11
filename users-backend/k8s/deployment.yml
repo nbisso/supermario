@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-backend-deployment
+  labels:
+    app: users-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: users-backend
+  template:
+    metadata:
+      labels:
+        app: users-backend
+    spec:
+      containers:
+        - name: users-backend
+          image: users-backend:0.0.1
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: '200m'
+              memory: '200Mi'
+            limits:
+              cpu: '200m'
+              memory: '200Mi'
