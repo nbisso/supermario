@@ -5,7 +5,7 @@ metadata:
   labels:
     app: auth-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: auth-service
@@ -21,8 +21,8 @@ spec:
             - containerPort: 8080
           resources:
             requests:
-              cpu: '200m'
-              memory: '200Mi'
+              cpu: "300m"
+              memory: "200Mi"
             limits:
-              cpu: '200m'
-              memory: '200Mi'
+              cpu: "300m"
+              memory: "200Mi"

@@ -11,6 +11,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -29,10 +30,11 @@ var users []model.User = []model.User{
 
 type NewPing struct {
 	Ping string `json:”ping,omitempty”`
+	Id   string `json:"id" bson:"_id,omitempty"`
 }
 
 func main() {
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://mongo-0.mongo:27017,mongo-1.mongo:27017,mongo-2.mongo:27017/auth"))
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://mongo:27017/auth"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -53,36 +55,14 @@ func main() {
 
 		collection := client.Database("auth").Collection("pings")
 
-		cur, err := collection.Find(c, NewPing{})
+		cur, err := collection.Find(c, bson.D{})
 
 		if err != nil {
 			c.JSON(http.StatusBadRequest, err.Error())
 			return
 		}
-		defer cur.Close(context.Background())
 
-		for cur.Next(context.Background()) {
-			// To decode into a struct, use cursor.Decode()
-			result := NewPing{}
-
-			err := cur.Decode(&result)
-			if err != nil {
-				log.Fatal(err)
-			}
-			// do something with result...
-
-			// To get the raw bson bytes use cursor.Current
-			// raw := cur.Current
-
-			// do something with raw...
-
-			items = append(items, result)
-		}
-		if err := cur.Err(); err != nil {
-			c.JSON(http.StatusBadRequest, err.Error())
-			return
-		}
-
+		cur.All(c, &items)
 		c.JSON(http.StatusOK, items)
 
 	})
@@ -96,7 +76,7 @@ func main() {
 			return
 		}
 
-		newitem := NewPing{name}
+		newitem := NewPing{Ping: name}
 
 		collection := client.Database("auth").Collection("pings")
 

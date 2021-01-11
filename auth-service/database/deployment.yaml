@@ -9,6 +9,14 @@ spec:
   podManagementPolicy: OrderedReady
   replicas: 3
   revisionHistoryLimit: 10
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-pv-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
   selector:
     matchLabels:
       app: mongo
@@ -27,6 +35,9 @@ spec:
           image: mongo:3.4.1
           imagePullPolicy: IfNotPresent
           name: mongodb
+          volumeMounts:
+            - name: mongo-pv-storage
+              mountPath: /data/db
           ports:
             - containerPort: 27017
               name: web
@@ -34,24 +45,35 @@ spec:
           resources: {}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
-        - command:
-            - bash
-            - /config/init.sh
-          image: mongo:3.4.1
-          imagePullPolicy: IfNotPresent
-          name: init-mongo
-          resources: {}
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          volumeMounts:
-            - mountPath: /config
-              name: config
+        - name: mongo-sidecar
+        #ver como crear aca un replica set connection
+          image: cvallance/mongo-k8s-sidecar
+          env:
+            - name: MONGO_SIDECAR_POD_LABELS
+              value: "app=mongo"
+        # - command:
+        #     - bash
+        #     - /config/init.sh
+        #   image: mongo:3.4.1
+        #   imagePullPolicy: IfNotPresent
+        #   name: init-mongo
+        #   resources: {}
+        #   terminationMessagePath: /dev/termination-log
+        #   terminationMessagePolicy: File
+        #   volumeMounts:
+        #     - mountPath: /config
+        #       name: config
+        #     - name: mongo-pv-storage
+        #       mountPath: /data/db
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
       volumes:
+        # - persistentVolumeClaim:
+        #     claimName: mongo-pv-claim
+        #   name: mongo-pv-storage
         - configMap:
             defaultMode: 420
             name: mongo-init
