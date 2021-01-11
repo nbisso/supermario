@@ -1,7 +1,8 @@
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 
-export default function Home() {
+export default function Home({delBack}) {
+  console.log(delBack)
   return (
     <div className={styles.container}>
       <Head>
@@ -16,6 +17,7 @@ export default function Home() {
 
         <p className={styles.description}>
           Get started by editing{' '}
+          {delBack.map(item => <h1>{item.id}</h1>)}
           <code className={styles.code}>pages/index.js</code>
         </p>
 
@@ -62,4 +64,15 @@ export default function Home() {
       </footer>
     </div>
   )
+}
+
+ 
+Home.getInitialProps = async (ctx) => {
+
+  const data = await fetch('http://auth-service-service/auth/pings')
+  const values = await data.json();
+
+  return {
+    delBack : values
+  }
 }
